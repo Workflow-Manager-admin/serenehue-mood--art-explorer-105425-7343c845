@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // PUBLIC_INTERFACE
 /**
@@ -10,6 +11,7 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
+  const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -18,6 +20,9 @@ function SignIn() {
     } else {
       // Demo (no actual auth logic)
       setStatus("Signed in (demo — no real authentication).");
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 650);
     }
   }
 
