@@ -312,15 +312,16 @@ function ColorOfDayCard({ color, setSelectedColor }) {
 }
 
 /**
+ * PUBLIC_INTERFACE
  * MoodboardShare:
- *  - Copy link to clipboard (default).
- *  - Show a preview & allow download as image (requires html2canvas, loads only when user clicks).
+ *  - Only shows a preview & allows download as image (requires html2canvas, loads only when user clicks).
+ *  - The shareable URL/copy feature has been removed per request.
  */
 function MoodboardShare({ selectedColor }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [generating, setGenerating] = useState(false);
 
-  // For accessibility/tight UI
+  // For display
   const colorNameMap = {
     "#abd3df": "Soothing Blue",
     "#fcf6f5": "Soft Blossom",
@@ -335,12 +336,7 @@ function MoodboardShare({ selectedColor }) {
     // eslint-disable-next-line
   }, [downloadUrl]);
 
-  function handleShare() {
-    const url = window.location.origin + '/explore?color=' + encodeURIComponent(selectedColor);
-    window.navigator.clipboard.writeText(url);
-    alert("Moodboard link copied to clipboard!");
-  }
-
+  // Only provide download as image (no share/copy button)
   async function handleDownload() {
     setGenerating(true);
     if (!window.html2canvas) {
@@ -376,32 +372,15 @@ function MoodboardShare({ selectedColor }) {
   return (
     <InfoCard title="Share Moodboard" style={{borderColor: COLORS.accent}}>
       <button
-        className="btn btn-share"
-        style={{background: COLORS.accent, color: COLORS.secondary, marginRight: "0.5em"}}
-        onClick={handleShare}
-        aria-label="Copy moodboard share link"
-        disabled={generating}
-      >
-        Share this mood
-      </button>
-      <button
         className="btn"
-        style={{background: COLORS.secondary, color: COLORS.accent, border: `1.5px solid ${COLORS.accent}`, marginLeft: "0.5em"}}
+        style={{background: COLORS.accent, color: COLORS.secondary, minWidth: 156}}
         onClick={handleDownload}
         aria-label="Download moodboard as image"
         disabled={generating}
       >
-        {generating ? "Generating..." : "Download as Image"}
+        {generating ? "Generating..." : "Download Moodboard as Image"}
       </button>
-      <div className="share-url" style={{marginTop: "10px"}}>
-        <div>
-          <span style={{fontWeight: 600, color: COLORS.accent}}>Share URL:</span>
-        </div>
-        <code style={{background: "#f7f4f8", padding: ".2em .4em", borderRadius: "10px", display: "block", wordBreak: "break-word"}}>
-          {window.location.origin}/explore?color={selectedColor}
-        </code>
-      </div>
-      {/* Style-matched preview for image rendering (hidden if not generating/downloadUrl, otherwise shown) */}
+      {/* Presentational preview for image rendering */}
       <div style={{
         marginTop: "18px",
         marginBottom: "0.6em",
@@ -466,7 +445,7 @@ function MoodboardShare({ selectedColor }) {
               color: COLORS.accent
             }}
           >
-            Download Moodboard Image
+            Download Image
           </a>
         }
       </div>
@@ -478,7 +457,7 @@ function MoodboardShare({ selectedColor }) {
  * PUBLIC_INTERFACE
  * ColorMoodExplorerPage displays the interactive "Explore Colors" interface.
  * Lets users pick/enter a color to explore associated emotions, music, artwork, and quote.
- * Extended features: color of the day, moodboard sharing (link & image), fully responsive layout.
+ * Extended features: color of the day, moodboard sharing (image option only), fully responsive layout.
  * All user features robust, with error and fallback handling for artwork API and custom colors.
  *
  * @returns {JSX.Element} The full Color Mood Explorer page content.
