@@ -59,11 +59,29 @@ function InfoCard({ title, children, style, className }) {
 function ColorSelector({ selectedColor, setSelectedColor }) {
   const palette = [COLORS.primary, COLORS.secondary, COLORS.accent];
   const [hexInput, setHexInput] = useState(selectedColor);
+  const [hexError, setHexError] = useState("");
+
+  // Only generate a new random color when user clicks random, not on render
+  const [randomColor, setRandomColor] = useState(randomHexColor());
 
   function onHexChange(e) {
     const val = e.target.value;
     setHexInput(val);
-    if (/^#[0-9a-fA-F]{6}$/.test(val)) setSelectedColor(val);
+    // Accept both #RRGGBB and #RGB (expand to #RRGGBB)
+    let hexVal = val;
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      setSelectedColor(val);
+      setHexError("");
+    } else if (/^#[0-9a-fA-F]{3}$/.test(val)) {
+      // Convert #RGB to #RRGGBB
+      const r = val[1], g = val[2], b = val[3];
+      const expanded = `#${r}${r}${g}${g}${b}${b}`;
+      setSelectedColor(expanded);
+      setHexError("");
+      setHexInput(expanded);
+    } else {
+      setHexError(val.length > 1 ? "Enter a valid #RRGGBB hex code" : "");
+    }
   }
   useEffect(() => setHexInput(selectedColor), [selectedColor]);
 
@@ -74,19 +92,25 @@ function ColorSelector({ selectedColor, setSelectedColor }) {
           <button
             key={color}
             className={`palette-color${selectedColor.toLowerCase() === color ? " active" : ""}`}
-            style={{backgroundColor: color}}
-            aria-label={color}
-            onClick={() => setSelectedColor(color)}
+            style={{ backgroundColor: color }}
+            aria-label={`Pick ${color}`}
+            onClick={() => {
+              setSelectedColor(color);
+              setHexInput(color);
+              setHexError("");
+            }}
           />
         ))}
         <button
           className="palette-color random-picker"
-          style={{backgroundColor: randomHexColor()}}
+          style={{ backgroundColor: randomColor }}
           aria-label="Random color"
           onClick={() => {
             const rnd = randomHexColor();
+            setRandomColor(randomHexColor()); // Update button display color also
             setSelectedColor(rnd);
             setHexInput(rnd);
+            setHexError("");
           }}
         >
           ?
@@ -100,21 +124,41 @@ function ColorSelector({ selectedColor, setSelectedColor }) {
         placeholder="#RRGGBB"
         aria-label="Hex code input"
         maxLength={7}
-        style={{borderColor: selectedColor}}
+        style={{ borderColor: selectedColor }}
       />
-      <div className="selector-color-sample" style={{background: selectedColor}} aria-label="Selected color" />
+      <div className="selector-color-sample" style={{ background: selectedColor }} aria-label="Selected color" />
+      {hexError && (
+        <div style={{ color: COLORS.accent, fontSize: ".93em", marginTop: 2, minHeight: 20 }}>
+          {hexError}
+        </div>
+      )}
     </div>
   );
 }
 
 function EmotionCard({ color }) {
-  const emotions = EMOTION_PALETTE[color.toLowerCase()] || ["Unknown", "Mood"];
+  const lowerColor = color.toLowerCase();
+  const emotions = EMOTION_PALETTE[lowerColor];
   return (
-    <InfoCard title="Emotional Associations" style={{borderColor: color}}>
+    <InfoCard title="Emotional Associations" style={{ borderColor: color }}>
       <div className="emotion-tags">
-        {emotions.map((e) => (
-          <span key={e} className="emotion-tag" style={{background: color + '22', color: color}}>{e}</span>
-        ))}
+        {emotions
+          ? emotions.map((e) => (
+              <span key={e} className="emotion-tag" style={{ background: color + "22", color }}>{e}</span>
+            ))
+          : (
+            <>
+              <span className="emotion-tag" style={{ background: color + "22", color }}>
+                Expressive
+              </span>
+              <span className="emotion-tag" style={{ background: color + "22", color }}>
+                Unique
+              </span>
+              <span className="emotion-tag" style={{ background: color + "22", color }}>
+                Mood
+              </span>
+            </>
+          )}
       </div>
     </InfoCard>
   );
@@ -122,18 +166,33 @@ function EmotionCard({ color }) {
 
 function MusicCard({ color }) {
   const playlist = MUSIC_PLAYLISTS[color.toLowerCase()];
-  if (!playlist) return (
-    <InfoCard title="Music Playlist" style={{borderColor: color}}>No playlist found.</InfoCard>
-  );
+  if (!playlist)
+    return (
+      <InfoCard title="Music Playlist" style={{ borderColor: color }}>
+        <div>
+          Enjoy a song that matches your unique vibe!
+          <br />
+          <a
+            href="https://open.spotify.com/search/"
+            className="music-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color, textDecoration: "underline", display: "block", marginTop: 6 }}
+          >
+            Discover music for your mood
+          </a>
+        </div>
+      </InfoCard>
+    );
   return (
-    <InfoCard title="Music Playlist" style={{borderColor: color}}>
+    <InfoCard title="Music Playlist" style={{ borderColor: color }}>
       <div>
         <a
           href={playlist.url}
           className="music-link"
           target="_blank"
           rel="noopener noreferrer"
-          style={{color}}
+          style={{ color }}
         >
           {playlist.title}
         </a>
@@ -166,32 +225,40 @@ function ArtworkCard({ color }) {
     setLoading(true);
     setArtwork(null);
     // Wikimedia Commons API sample endpoint:
-    // https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&generator=search&gsrsearch=blue+painting&gsrnamespace=6&iiprop=url&format=json&origin=*
-    fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrnamespace=6&iiprop=url&format=json&origin=*`)
-      .then(r => r.json())
-      .then(data => {
+    fetch(
+      `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&generator=search&gsrsearch=${encodeURIComponent(
+        q
+      )}&gsrnamespace=6&iiprop=url&format=json&origin=*`
+    )
+      .then((r) => r.json())
+      .then((data) => {
         if (!isMounted) return;
-        // Search for first result with image
+        // Search for first result with image file
         let first = null;
-        if (data.query && data.query.pages) {
+        if (data && data.query && data.query.pages) {
           for (const pgid in data.query.pages) {
             const pg = data.query.pages[pgid];
             if (pg.imageinfo && pg.imageinfo[0]?.url) {
               first = {
-                title: pg.title.replace("File:", ""),
+                title: pg.title ? pg.title.replace("File:", "") : "Artwork",
                 image: pg.imageinfo[0].url,
-                artist: "Public Domain (Wikimedia)"
+                artist: "Public Domain (Wikimedia)",
               };
               break;
             }
           }
         }
-        // Use found artwork or fallback placeholder
-        setArtwork(first || placeholder);
+        setArtwork(first || placeholder || null);
       })
-      .catch(() => setArtwork(placeholder))
-      .finally(() => setLoading(false));
-    return () => { isMounted = false; };
+      .catch(() => {
+        if (isMounted) setArtwork(placeholder || null);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color]);
 
@@ -217,9 +284,12 @@ function ArtworkCard({ color }) {
 }
 
 function QuoteCard({ color }) {
-  const quote = QUOTES[color.toLowerCase()] || "Let color inspire you.";
+  const lowerColor = color.toLowerCase();
+  const quote =
+    QUOTES[lowerColor] ||
+    "Let color inspire you. \"Color is a power which directly influences the soul.\" – Kandinsky";
   return (
-    <InfoCard title="Quote / Poem" style={{borderColor: color}}>
+    <InfoCard title="Quote / Poem" style={{ borderColor: color }}>
       <div className="quote-content">{quote}</div>
     </InfoCard>
   );
@@ -254,8 +324,16 @@ function MoodboardShare({ selectedColor }) {
   const colorNameMap = {
     "#abd3df": "Soothing Blue",
     "#fcf6f5": "Soft Blossom",
-    "#e7a7c1": "Romantic Blush"
+    "#e7a7c1": "Romantic Blush",
   };
+
+  // CLEANUP: Revoke previous blob URL when new image is generated or component is unmounted
+  useEffect(() => {
+    return () => {
+      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    };
+    // eslint-disable-next-line
+  }, [downloadUrl]);
 
   function handleShare() {
     const url = window.location.origin + '/explore?color=' + encodeURIComponent(selectedColor);
@@ -284,7 +362,7 @@ function MoodboardShare({ selectedColor }) {
     window.html2canvas(el, {
       backgroundColor: null,
       useCORS: true,
-      allowTaint: false
+      allowTaint: false,
     }).then(canvas => {
       canvas.toBlob(blob => {
         if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -396,7 +474,15 @@ function MoodboardShare({ selectedColor }) {
   );
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * ColorMoodExplorerPage displays the interactive "Explore Colors" interface.
+ * Lets users pick/enter a color to explore associated emotions, music, artwork, and quote.
+ * Extended features: color of the day, moodboard sharing (link & image), fully responsive layout.
+ * All user features robust, with error and fallback handling for artwork API and custom colors.
+ *
+ * @returns {JSX.Element} The full Color Mood Explorer page content.
+ */
 function ColorMoodExplorerPage() {
   const [selectedColor, setSelectedColor] = useState(COLORS.primary);
 
