@@ -30,8 +30,8 @@ function Home() {
       }}>
         Discover the moods, music, art, and meaning behind every color.<br /> Enter your mood through color or explore the <span style={{color: "var(--app-accent)"}}>color of the day</span>.
       </p>
-      {/* Use client-side routing to /signin instead of /explore */}
-      <a href="/signin" className="btn btn-accent" style={{display: "inline-block", margin: "10px"}}>
+      {/* Client-side routing to /explore (no sign-in required) */}
+      <a href="/explore" className="btn btn-accent" style={{display: "inline-block", margin: "10px"}}>
         Explore Colors
       </a>
       {/* Sign In button removed */}
