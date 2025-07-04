@@ -367,6 +367,8 @@ function ColorOfDayCard({ color, setSelectedColor }) {
 function MoodboardShare({ selectedColor }) {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState(null); // New: Track error
+  const downloadLinkRef = React.useRef(null); // New: Focus download button for a11y
 
   // For display
   const colorNameMap = {
@@ -386,38 +388,81 @@ function MoodboardShare({ selectedColor }) {
     };
     // eslint-disable-next-line
   }, [downloadUrl]);
+  // Cleanup error on color or state
+  useEffect(() => setError(null), [selectedColor, generating]);
+
+  // Helper: Check if html2canvas script already loaded
+  function html2canvasLoaded() {
+    return !!window.html2canvas;
+  }
 
   // Only provide download as image (no share/copy button)
-  async function handleDownload() {
+  async function handleDownload(e) {
+    setError(null);
     setGenerating(true);
-    if (!window.html2canvas) {
-      // Dynamically load html2canvas if not present
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.body.appendChild(script);
-      });
+    // Prevent script tag duplication
+    if (!html2canvasLoaded()) {
+      if (!document.getElementById("html2canvas-script")) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+          script.id = "html2canvas-script";
+          script.onload = resolve;
+          script.onerror = () => {
+            reject(new Error("Could not load html2canvas library!"));
+          };
+          document.body.appendChild(script);
+        }).catch(err => {
+          setGenerating(false);
+          setError("Failed to load image generator library. Please try again.");
+          return;
+        });
+      }
+      // Brief wait for script to register
+      if (!html2canvasLoaded()) {
+        await new Promise(r => setTimeout(r, 200));
+      }
     }
     const el = document.getElementById('moodboard-share-preview');
-    if (!el || !window.html2canvas) {
+    if (!el || !html2canvasLoaded()) {
       setGenerating(false);
-      alert("Could not render image.");
+      setError("Could not render image. Please refresh the page and try again.");
       return;
     }
-    window.html2canvas(el, {
-      backgroundColor: null,
-      useCORS: true,
-      allowTaint: false,
-    }).then(canvas => {
-      canvas.toBlob(blob => {
-        if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-        const url = URL.createObjectURL(blob);
-        setDownloadUrl(url);
+    try {
+      window.html2canvas(el, {
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: false,
+        onclone: (clonedDoc) => {
+          // High contrast for a11y: e.g., force color for code
+          const code = clonedDoc.getElementById("moodboard-share-preview").querySelector("code");
+          if (code) code.style.background = "#fff9";
+        }
+      }).then(canvas => {
+        canvas.toBlob(blob => {
+          if (!blob) {
+            setError("Could not generate an image. Try a different color.");
+            setGenerating(false);
+            return;
+          }
+          if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+          const url = URL.createObjectURL(blob);
+          setDownloadUrl(url);
+          setGenerating(false);
+          setTimeout(() => {
+            // Accessibility: focus on download link after available
+            if (downloadLinkRef.current) downloadLinkRef.current.focus();
+          }, 100);
+        }, "image/png");
+      }).catch(err => {
+        setError("Failed to generate image (possibly due to browser CORS or graphics limitations). Try another browser or color.");
         setGenerating(false);
-      }, "image/png");
-    }).catch(() => setGenerating(false));
+      });
+    } catch (err) {
+      setError("Could not create image. Please try again later.");
+      setGenerating(false);
+    }
   }
 
   return (
@@ -427,10 +472,17 @@ function MoodboardShare({ selectedColor }) {
         style={{background: COLORS.accent, color: COLORS.secondary, minWidth: 156}}
         onClick={handleDownload}
         aria-label="Download moodboard as image"
+        aria-disabled={generating}
         disabled={generating}
+        tabIndex={0}
       >
         {generating ? "Generating..." : "Download Moodboard as Image"}
       </button>
+      {error && (
+        <div style={{ color: "#b3003c", marginTop: 7, fontSize: ".98em", minHeight: 28, fontWeight: 500 }}>
+          {error}
+        </div>
+      )}
       {/* Presentational preview for image rendering */}
       <div style={{
         marginTop: "18px",
@@ -486,6 +538,7 @@ function MoodboardShare({ selectedColor }) {
         </div>
         {downloadUrl &&
           <a
+            ref={downloadLinkRef}
             href={downloadUrl}
             download={`moodboard-${selectedColor.replace("#", "")}.png`}
             className="btn"
@@ -495,6 +548,8 @@ function MoodboardShare({ selectedColor }) {
               background: COLORS.primary,
               color: COLORS.accent
             }}
+            tabIndex={0}
+            aria-label="Download generated moodboard image"
           >
             Download Image
           </a>
