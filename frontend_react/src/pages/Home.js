@@ -33,9 +33,7 @@ function Home() {
       <a href="/explore" className="btn btn-accent" style={{display: "inline-block", margin: "10px"}}>
         Explore Colors
       </a>
-      <a href="/signin" className="btn" style={{marginLeft: "10px"}}>
-        Sign In
-      </a>
+      {/* Sign In button removed */}
       <div style={{marginTop: "40px", fontSize: "0.97em", color: "var(--text-secondary)"}}>
         <em>Peaceful, introspective, and artistic journeys for everyone.</em>
       </div>

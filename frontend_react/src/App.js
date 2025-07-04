@@ -28,10 +28,7 @@ function AppNav() {
         color: path === "/explore" ? "#fff" : "var(--button-text)",
         marginRight: "10px"
       }}>Explore</Link>
-      <Link to="/signin" className="btn" style={{
-        background: path === "/signin" ? "var(--app-accent)" : "var(--button-bg)",
-        color: path === "/signin" ? "#fff" : "var(--button-text)"
-      }}>Sign In</Link>
+      {/* Sign In button removed for seamless, distraction-free experience */}
     </nav>
   );
 }
