@@ -6,9 +6,9 @@ Attempting to bind to HOST environment variable: 0.0.0.0
 If this was unintentional, check that you haven't mistakenly set it in your shell.
 Learn more here: https://cra.link/advanced-config
 
-(node:2006) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:4533) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-(node:2006) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:4533) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
 Starting the development server...
 
 Compiled successfully!
@@ -22,126 +22,6 @@ Note that the development build is not optimized.
 To create a production build, use npm run build.
 
 webpack compiled successfully
-Compiling...
-Failed to compile.
-
-[eslint] 
-src/App.js
-  Line 221:1:   Import in body of module; reorder to top  import/first
-  Line 230:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 236:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 241:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 263:6:   'Router' is not defined                   react/jsx-no-undef
-  Line 266:10:  'Routes' is not defined                   react/jsx-no-undef
-  Line 267:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 267:37:  'Home' is not defined                     react/jsx-no-undef
-  Line 268:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 268:43:  'SignIn' is not defined                   react/jsx-no-undef
-  Line 269:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:37:  'Navigate' is not defined                 react/jsx-no-undef
-
-Search for the keywords to learn more about each error.
-WARNING in [eslint] 
-src/App.js
-  Line 51:7:    'COLOR_OF_DAY' is assigned a value but never used  no-unused-vars
-  Line 64:10:   'ColorSelector' is defined but never used          no-unused-vars
-  Line 117:10:  'EmotionCard' is defined but never used            no-unused-vars
-  Line 131:10:  'MusicCard' is defined but never used              no-unused-vars
-  Line 156:10:  'ArtworkCard' is defined but never used            no-unused-vars
-  Line 171:10:  'QuoteCard' is defined but never used              no-unused-vars
-  Line 181:10:  'ColorOfDayCard' is defined but never used         no-unused-vars
-  Line 198:10:  'MoodboardShare' is defined but never used         no-unused-vars
-
-ERROR in [eslint] 
-src/App.js
-  Line 221:1:   Import in body of module; reorder to top  import/first
-  Line 230:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 236:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 241:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 263:6:   'Router' is not defined                   react/jsx-no-undef
-  Line 266:10:  'Routes' is not defined                   react/jsx-no-undef
-  Line 267:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 267:37:  'Home' is not defined                     react/jsx-no-undef
-  Line 268:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 268:43:  'SignIn' is not defined                   react/jsx-no-undef
-  Line 269:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:37:  'Navigate' is not defined                 react/jsx-no-undef
-
-Search for the keywords to learn more about each error.
-
-webpack compiled with 1 error and 1 warning
-Compiling...
-Failed to compile.
-
-[eslint] 
-src/App.js
-  Line 221:1:   Import in body of module; reorder to top  import/first
-  Line 230:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 236:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 241:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 263:6:   'Router' is not defined                   react/jsx-no-undef
-  Line 266:10:  'Routes' is not defined                   react/jsx-no-undef
-  Line 267:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 267:37:  'Home' is not defined                     react/jsx-no-undef
-  Line 268:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 268:43:  'SignIn' is not defined                   react/jsx-no-undef
-  Line 269:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:37:  'Navigate' is not defined                 react/jsx-no-undef
-
-Search for the keywords to learn more about each error.
-WARNING in [eslint] 
-src/App.js
-  Line 51:7:    'COLOR_OF_DAY' is assigned a value but never used  no-unused-vars
-  Line 64:10:   'ColorSelector' is defined but never used          no-unused-vars
-  Line 117:10:  'EmotionCard' is defined but never used            no-unused-vars
-  Line 131:10:  'MusicCard' is defined but never used              no-unused-vars
-  Line 156:10:  'ArtworkCard' is defined but never used            no-unused-vars
-  Line 171:10:  'QuoteCard' is defined but never used              no-unused-vars
-  Line 181:10:  'ColorOfDayCard' is defined but never used         no-unused-vars
-  Line 198:10:  'MoodboardShare' is defined but never used         no-unused-vars
-
-ERROR in [eslint] 
-src/App.js
-  Line 221:1:   Import in body of module; reorder to top  import/first
-  Line 230:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 236:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 241:8:   'Link' is not defined                     react/jsx-no-undef
-  Line 263:6:   'Router' is not defined                   react/jsx-no-undef
-  Line 266:10:  'Routes' is not defined                   react/jsx-no-undef
-  Line 267:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 267:37:  'Home' is not defined                     react/jsx-no-undef
-  Line 268:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 268:43:  'SignIn' is not defined                   react/jsx-no-undef
-  Line 269:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:12:  'Route' is not defined                    react/jsx-no-undef
-  Line 271:37:  'Navigate' is not defined                 react/jsx-no-undef
-
-Search for the keywords to learn more about each error.
-
-webpack compiled with 1 error and 1 warning
-Compiling...
-Failed to compile.
-
-Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/serenehue-mood--art-explorer-105425-7343c845/frontend_react/src'
-ERROR in ./src/App.js 6:0-90
-Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/serenehue-mood--art-explorer-105425-7343c845/frontend_react/src'
-
-webpack compiled with 1 error
-Compiling...
-Failed to compile.
-
-Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/serenehue-mood--art-explorer-105425-7343c845/frontend_react/src'
-LOG from webpack.FileSystemInfo
-<w> Managed item /home/kavia/workspace/code-generation/serenehue-mood--art-explorer-105425-7343c845/frontend_react/node_modules/react-router-dom isn't a directory or doesn't contain a package.json (see snapshot.managedPaths option)
-+ 13 hidden lines
-
-ERROR in ./src/App.js 6:0-90
-Module not found: Error: Can't resolve 'react-router-dom' in '/home/kavia/workspace/code-generation/serenehue-mood--art-explorer-105425-7343c845/frontend_react/src'
-
-webpack compiled with 1 error
 Compiling...
 Compiled successfully!
 webpack compiled successfully

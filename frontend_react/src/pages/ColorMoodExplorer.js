@@ -223,6 +223,7 @@ function ColorMoodExplorerPage() {
             Choose a Color to Explore
           </h2>
           <ColorSelector selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+          {/* Move aside section outside main-content grid to fix layout */}
         </section>
         <div className="info-card-grid">
           <EmotionCard color={selectedColor} />
@@ -230,11 +231,11 @@ function ColorMoodExplorerPage() {
           <ArtworkCard color={selectedColor} />
           <QuoteCard color={selectedColor} />
         </div>
-        <aside className="side-section">
-          <ColorOfDayCard color={COLOR_OF_DAY} setSelectedColor={setSelectedColor} />
-          <MoodboardShare selectedColor={selectedColor} />
-        </aside>
       </main>
+      <aside className="side-section">
+        <ColorOfDayCard color={COLOR_OF_DAY} setSelectedColor={setSelectedColor} />
+        <MoodboardShare selectedColor={selectedColor} />
+      </aside>
     </div>
   );
 }

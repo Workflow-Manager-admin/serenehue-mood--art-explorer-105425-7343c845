@@ -58,7 +58,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/explore" element={<ColorMoodExplorerPage />} />
           {/* fallback route: redirect to home */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <AppFooter />
       </div>
