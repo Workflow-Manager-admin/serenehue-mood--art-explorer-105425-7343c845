@@ -3,31 +3,25 @@ import React, { useState, useRef } from "react";
 // Simple email format regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// PUBLIC_INTERFACE
-function SignIn() {
-  /**
-   * Enhanced Sign In page: full state management, validation, loading, and user feedback,
-   * with mock authentication logic and calming UI/UX.
-   */
-
+/**
+ * PUBLIC_INTERFACE
+ * SignIn page with ability to accept onSignIn callback, used by App for routing after authentication.
+ * If onSignIn is provided and sign-in succeeds, calls it; else, sets own success state as before.
+ */
+function SignIn({ onSignIn }) {
   // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // Per-field error messages
   const [emailError, setEmailError] = useState("");
   const [pwError, setPwError] = useState("");
-  // Loading and general auth state
   const [loading, setLoading] = useState(false);
   const [formState, setFormState] = useState("idle"); // idle | submitting | success | error
   const [msg, setMsg] = useState("");
-  // Used for focus management after submit
   const emailRef = useRef(null);
   const pwRef = useRef(null);
 
-  // Validate fields and return boolean
   function validateFields() {
     let valid = true;
-    // Email required and valid
     if (!email.trim()) {
       setEmailError("Email is required");
       valid = false;
@@ -39,7 +33,6 @@ function SignIn() {
     } else {
       setEmailError("");
     }
-    // Password required
     if (!password) {
       setPwError("Password is required");
       if (valid && pwRef.current) pwRef.current.focus();
@@ -54,12 +47,9 @@ function SignIn() {
     return valid;
   }
 
-  // Mock sign-in logic
   function mockAuthenticate(email, password) {
-    // For demo: only allow `user@example.com`/`demo123`
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Demo: accept any email with password 'demo123', or simulate basic match
         if (password === "demo123") {
           resolve({ status: "success", user: { email } });
         } else {
@@ -78,19 +68,20 @@ function SignIn() {
 
     if (!validateFields()) {
       setFormState("error");
-      setMsg(""); // Field-specific errors shown above
+      setMsg("");
       return;
     }
 
     setLoading(true);
     setFormState("submitting");
-    // Simulate async sign-in (mock api)
     try {
-      const res = await mockAuthenticate(email, password);
+      await mockAuthenticate(email, password);
       setFormState("success");
       setMsg("Welcome! You signed in successfully. (This is a demo.)");
-      // Optionally clear fields
-      // setEmail(""); setPassword("");
+      // Call onSignIn after "auth", if supplied
+      if (typeof onSignIn === "function") {
+        setTimeout(onSignIn, 400); // slight delay for UX, can remove if instant preferred
+      }
     } catch (err) {
       setFormState("error");
       setMsg(err.message || "Authentication failed");
