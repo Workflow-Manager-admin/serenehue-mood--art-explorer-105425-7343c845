@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import ColorMoodExplorerPage from "./pages/ColorMoodExplorer";
+import SignIn from "./pages/SignIn";
 
 const COLORS = {
   primary: '#abd3df',
@@ -15,18 +16,41 @@ function AppNav() {
   const location = window.location.pathname;
   return (
     <nav className="app-nav">
-      <span className="nav-title" style={{marginRight: "2rem"}}>🎨 Color Mood Explorer</span>
-      <Link to="/" className="btn" style={{
-        background: location === "/" ? "var(--app-accent)" : "var(--button-bg)",
-        color: location === "/" ? "#fff" : "var(--button-text)",
-        marginLeft: 0,
-        marginRight: "10px"
-      }}>Home</Link>
-      <Link to="/explore" className="btn" style={{
-        background: location === "/explore" ? "var(--app-accent)" : "var(--button-bg)",
-        color: location === "/explore" ? "#fff" : "var(--button-text)",
-        marginRight: "10px"
-      }}>Explore</Link>
+      <span className="nav-title" style={{ marginRight: "2rem" }}>🎨 Color Mood Explorer</span>
+      <Link
+        to="/"
+        className="btn"
+        style={{
+          background: location === "/" ? "var(--app-accent)" : "var(--button-bg)",
+          color: location === "/" ? "#fff" : "var(--button-text)",
+          marginLeft: 0,
+          marginRight: "10px",
+        }}
+      >
+        Home
+      </Link>
+      <Link
+        to="/explore"
+        className="btn"
+        style={{
+          background: location === "/explore" ? "var(--app-accent)" : "var(--button-bg)",
+          color: location === "/explore" ? "#fff" : "var(--button-text)",
+          marginRight: "10px",
+        }}
+      >
+        Explore
+      </Link>
+      <Link
+        to="/signin"
+        className="btn"
+        style={{
+          background: location === "/signin" ? "var(--app-accent)" : "var(--button-bg)",
+          color: location === "/signin" ? "#fff" : "var(--button-text)",
+          marginLeft: "auto"
+        }}
+      >
+        Sign In
+      </Link>
     </nav>
   );
 }
@@ -52,6 +76,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<ColorMoodExplorerPage />} />
+          <Route path="/signin" element={<SignIn />} />
           {/* fallback route: redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
