@@ -9,20 +9,45 @@ import React, { useState, useEffect } from "react";
 // Inline below: the palette, info cards, and color picker used in original App.js
 
 const COLORS = {
-  primary: '#abd3df',
-  secondary: '#fcf6f5',
-  accent: '#e7a7c1'
+  primary: '#abd3df',       // Soothing Blue
+  secondary: '#fcf6f5',     // Soft Blossom
+  accent: '#e7a7c1',        // Romantic Blush
+  mint: '#baf2d8',          // Serene Mint (new)
+  sunflower: '#ffe066',     // Sunflower (new)
+  lavender: '#b39ddb',      // Gentle Lavender (new)
+  coral: '#ffb5a7',         // Coral Glow (new)
 };
+// PALETTE order for UI and mapping
+const COLOR_PALETTE = [
+  COLORS.primary,
+  COLORS.secondary,
+  COLORS.accent,
+  COLORS.mint,
+  COLORS.sunflower,
+  COLORS.lavender,
+  COLORS.coral
+];
+
 const EMOTION_PALETTE = {
   "#abd3df": ["Calm", "Peaceful", "Clear"],
   "#fcf6f5": ["Gentle", "Soft", "Cozy"],
-  "#e7a7c1": ["Compassion", "Romance", "Warmth"]
+  "#e7a7c1": ["Compassion", "Romance", "Warmth"],
+  "#baf2d8": ["Fresh", "Revived", "Hopeful"],
+  "#ffe066": ["Joyful", "Inspired", "Optimistic"],
+  "#b39ddb": ["Dreamy", "Creative", "Tranquil"],
+  "#ffb5a7": ["Playful", "Energetic", "Friendly"],
 };
+
 const MUSIC_PLAYLISTS = {
   "#abd3df": { title: "Gentle Streams", url: "https://open.spotify.com/", artist: "Calm Collective" },
   "#fcf6f5": { title: "Soft Mornings", url: "https://open.spotify.com/", artist: "Dream Pop" },
-  "#e7a7c1": { title: "Warm Hues", url: "https://open.spotify.com/", artist: "Blush" }
+  "#e7a7c1": { title: "Warm Hues", url: "https://open.spotify.com/", artist: "Blush" },
+  "#baf2d8": { title: "Fresh Start", url: "https://open.spotify.com/", artist: "Green Meadow" },
+  "#ffe066": { title: "Sunny Vibes", url: "https://open.spotify.com/", artist: "Sunbeam Sound Machine" },
+  "#b39ddb": { title: "Lavender Dreams", url: "https://open.spotify.com/", artist: "Indigo Mood" },
+  "#ffb5a7": { title: "Coral Coast", url: "https://open.spotify.com/", artist: "Coastal Daylight" },
 };
+
 const ARTWORKS = {
   "#abd3df": {
     title: "The Blue Boat", artist: "Winslow Homer", image: "https://uploads8.wikiart.org/images/winslow-homer/the-blue-boat-1892.jpg!Large.jpg"
@@ -32,12 +57,29 @@ const ARTWORKS = {
   },
   "#e7a7c1": {
     title: "Water Lilies", artist: "Claude Monet", image: "https://uploads4.wikiart.org/images/claude-monet/water-lilies-1919.jpg!Large.jpg"
-  }
+  },
+  "#baf2d8": {
+    title: "The Mint Garden", artist: "Georgia O'Keeffe", image: "https://www.georgiaokeeffe.net/images/paintings/white-flower-on-red-earth.jpg"
+  },
+  "#ffe066": {
+    title: "Sunflowers", artist: "Vincent Van Gogh", image: "https://uploads6.wikiart.org/images/vincent-van-gogh/sunflowers-1888(1).jpg!Large.jpg"
+  },
+  "#b39ddb": {
+    title: "Lavender Hills", artist: "Gustave Caillebotte", image: "https://uploads8.wikiart.org/images/anna-ancher/landscape-with-lavender-heather.jpg"
+  },
+  "#ffb5a7": {
+    title: "Coral Reef", artist: "Hokusai", image: "https://uploads8.wikiart.org/images/katsushika-hokusai/the-sea-at-satta.jpg!Large.jpg"
+  },
 };
+
 const QUOTES = {
   "#abd3df": `"There is peace even in the storm." — Vincent Van Gogh`,
   "#fcf6f5": `"Softness is not weakness. It takes courage to stay delicate in a world this cruel." — Beau Taplin`,
-  "#e7a7c1": `"Where words are restrained, the eyes often talk a great deal." — Samuel Richardson`
+  "#e7a7c1": `"Where words are restrained, the eyes often talk a great deal." — Samuel Richardson`,
+  "#baf2d8": `"The soul becomes dyed with the color of its thoughts." — Marcus Aurelius`,
+  "#ffe066": `"You are my sunshine, my only sunshine." — Popular Song`,
+  "#b39ddb": `"The earth laughs in flowers." — Ralph Waldo Emerson`,
+  "#ffb5a7": `"Wherever you go, no matter what the weather, always bring your own sunshine." — Anthony J. D’Angelo`,
 };
 const COLOR_OF_DAY = "#e7a7c1";
 
@@ -57,7 +99,8 @@ function InfoCard({ title, children, style, className }) {
 }
 
 function ColorSelector({ selectedColor, setSelectedColor }) {
-  const palette = [COLORS.primary, COLORS.secondary, COLORS.accent];
+  // Now uses updated COLOR_PALETTE for expanded palette
+  const palette = COLOR_PALETTE;
   const [hexInput, setHexInput] = useState(selectedColor);
   const [hexError, setHexError] = useState("");
 
@@ -210,11 +253,15 @@ function ArtworkCard({ color }) {
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Map colors to broad artwork search terms
+  // Map colors to broad artwork search terms (extended for new palette)
   const colorTerms = {
     "#abd3df": "blue painting",
     "#fcf6f5": "cherry blossom",
-    "#e7a7c1": "pink impressionism"
+    "#e7a7c1": "pink impressionism",
+    "#baf2d8": "mint green art",
+    "#ffe066": "yellow abstract",
+    "#b39ddb": "lavender field painting",
+    "#ffb5a7": "coral color seascape"
   };
 
   const placeholder = ARTWORKS[color.toLowerCase()] || null;
@@ -326,6 +373,10 @@ function MoodboardShare({ selectedColor }) {
     "#abd3df": "Soothing Blue",
     "#fcf6f5": "Soft Blossom",
     "#e7a7c1": "Romantic Blush",
+    "#baf2d8": "Serene Mint",
+    "#ffe066": "Sunflower",
+    "#b39ddb": "Gentle Lavender",
+    "#ffb5a7": "Coral Glow",
   };
 
   // CLEANUP: Revoke previous blob URL when new image is generated or component is unmounted
