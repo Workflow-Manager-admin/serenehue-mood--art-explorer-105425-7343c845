@@ -143,11 +143,70 @@ function MusicCard({ color }) {
   );
 }
 
+/**
+ * Attempts to fetch a public artwork related to the selected color from Wikimedia Commons API,
+ * falling back to placeholders if API fails. Uses a color keyword for approximate matching.
+ */
 function ArtworkCard({ color }) {
-  const artwork = ARTWORKS[color.toLowerCase()];
-  if (!artwork) return (
-    <InfoCard title="Artwork" style={{borderColor: color}}>No artwork found.</InfoCard>
+  const [artwork, setArtwork] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Map colors to broad artwork search terms
+  const colorTerms = {
+    "#abd3df": "blue painting",
+    "#fcf6f5": "cherry blossom",
+    "#e7a7c1": "pink impressionism"
+  };
+
+  const placeholder = ARTWORKS[color.toLowerCase()] || null;
+
+  useEffect(() => {
+    let isMounted = true;
+    const q = colorTerms[color.toLowerCase()] || "abstract painting";
+    setLoading(true);
+    setArtwork(null);
+    // Wikimedia Commons API sample endpoint:
+    // https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&generator=search&gsrsearch=blue+painting&gsrnamespace=6&iiprop=url&format=json&origin=*
+    fetch(`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrnamespace=6&iiprop=url&format=json&origin=*`)
+      .then(r => r.json())
+      .then(data => {
+        if (!isMounted) return;
+        // Search for first result with image
+        let first = null;
+        if (data.query && data.query.pages) {
+          for (const pgid in data.query.pages) {
+            const pg = data.query.pages[pgid];
+            if (pg.imageinfo && pg.imageinfo[0]?.url) {
+              first = {
+                title: pg.title.replace("File:", ""),
+                image: pg.imageinfo[0].url,
+                artist: "Public Domain (Wikimedia)"
+              };
+              break;
+            }
+          }
+        }
+        // Use found artwork or fallback placeholder
+        setArtwork(first || placeholder);
+      })
+      .catch(() => setArtwork(placeholder))
+      .finally(() => setLoading(false));
+    return () => { isMounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color]);
+
+  if (loading) return (
+    <InfoCard title="Artwork" style={{borderColor: color}}>
+      <div>Loading related art...</div>
+    </InfoCard>
   );
+
+  if (!artwork) return (
+    <InfoCard title="Artwork" style={{borderColor: color}}>
+      <div>No artwork found.</div>
+    </InfoCard>
+  );
+
   return (
     <InfoCard title="Artwork" style={{borderColor: color}}>
       <img src={artwork.image} alt={artwork.title} className="artwork-img" />
@@ -182,23 +241,156 @@ function ColorOfDayCard({ color, setSelectedColor }) {
   );
 }
 
+/**
+ * MoodboardShare:
+ *  - Copy link to clipboard (default).
+ *  - Show a preview & allow download as image (requires html2canvas, loads only when user clicks).
+ */
 function MoodboardShare({ selectedColor }) {
+  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [generating, setGenerating] = useState(false);
+
+  // For accessibility/tight UI
+  const colorNameMap = {
+    "#abd3df": "Soothing Blue",
+    "#fcf6f5": "Soft Blossom",
+    "#e7a7c1": "Romantic Blush"
+  };
+
   function handleShare() {
     const url = window.location.origin + '/explore?color=' + encodeURIComponent(selectedColor);
     window.navigator.clipboard.writeText(url);
     alert("Moodboard link copied to clipboard!");
   }
+
+  async function handleDownload() {
+    setGenerating(true);
+    if (!window.html2canvas) {
+      // Dynamically load html2canvas if not present
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+      });
+    }
+    const el = document.getElementById('moodboard-share-preview');
+    if (!el || !window.html2canvas) {
+      setGenerating(false);
+      alert("Could not render image.");
+      return;
+    }
+    window.html2canvas(el, {
+      backgroundColor: null,
+      useCORS: true,
+      allowTaint: false
+    }).then(canvas => {
+      canvas.toBlob(blob => {
+        if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+        const url = URL.createObjectURL(blob);
+        setDownloadUrl(url);
+        setGenerating(false);
+      }, "image/png");
+    }).catch(() => setGenerating(false));
+  }
+
   return (
     <InfoCard title="Share Moodboard" style={{borderColor: COLORS.accent}}>
       <button
         className="btn btn-share"
-        style={{background: COLORS.accent, color: COLORS.secondary}}
+        style={{background: COLORS.accent, color: COLORS.secondary, marginRight: "0.5em"}}
         onClick={handleShare}
+        aria-label="Copy moodboard share link"
+        disabled={generating}
       >
         Share this mood
       </button>
-      <div className="share-url">
-        <code>{window.location.origin}/explore?color={selectedColor}</code>
+      <button
+        className="btn"
+        style={{background: COLORS.secondary, color: COLORS.accent, border: `1.5px solid ${COLORS.accent}`, marginLeft: "0.5em"}}
+        onClick={handleDownload}
+        aria-label="Download moodboard as image"
+        disabled={generating}
+      >
+        {generating ? "Generating..." : "Download as Image"}
+      </button>
+      <div className="share-url" style={{marginTop: "10px"}}>
+        <div>
+          <span style={{fontWeight: 600, color: COLORS.accent}}>Share URL:</span>
+        </div>
+        <code style={{background: "#f7f4f8", padding: ".2em .4em", borderRadius: "10px", display: "block", wordBreak: "break-word"}}>
+          {window.location.origin}/explore?color={selectedColor}
+        </code>
+      </div>
+      {/* Style-matched preview for image rendering (hidden if not generating/downloadUrl, otherwise shown) */}
+      <div style={{
+        marginTop: "18px",
+        marginBottom: "0.6em",
+        opacity: "0.87"
+      }}>
+        <div
+          id="moodboard-share-preview"
+          style={{
+            padding: "24px 24px 20px 24px",
+            borderRadius: "22px",
+            background: selectedColor,
+            color: "#222",
+            boxShadow: "0 2px 18px rgba(173,211,223,0.08)",
+            maxWidth: "300px",
+            margin: "0 auto",
+            border: `2.5px solid ${COLORS.accent}`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}
+        >
+          <div style={{
+            width: "52px", height: "52px",
+            borderRadius: "70%",
+            background: selectedColor,
+            border: "3.5px solid #FFF",
+            marginBottom: "8px"
+          }}></div>
+          <span style={{
+            fontSize: "1.27em",
+            fontWeight: 700,
+            letterSpacing: ".01em",
+            color: "#fff",
+            textShadow: "0 1px 9px #2222"
+          }}>
+            {colorNameMap[selectedColor.toLowerCase()] || selectedColor}
+          </span>
+          <span style={{
+            fontSize: ".98em",
+            margin: "8px 0 2px 0"
+          }}>
+            Moodboard by Color Mood Explorer
+          </span>
+          <code style={{
+            background: "#fff9",
+            color: selectedColor,
+            fontSize: '.93em',
+            padding: ".1em .4em",
+            borderRadius: '9px',
+            marginTop: "8px"
+          }}>{selectedColor.toUpperCase()}</code>
+        </div>
+        {downloadUrl &&
+          <a
+            href={downloadUrl}
+            download={`moodboard-${selectedColor.replace("#", "")}.png`}
+            className="btn"
+            style={{
+              display: "block",
+              marginTop: "8px",
+              background: COLORS.primary,
+              color: COLORS.accent
+            }}
+          >
+            Download Moodboard Image
+          </a>
+        }
       </div>
     </InfoCard>
   );
